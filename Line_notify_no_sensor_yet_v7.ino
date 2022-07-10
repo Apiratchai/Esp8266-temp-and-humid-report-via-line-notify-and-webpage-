@@ -33,14 +33,14 @@ void handle_OnConnect();
 void handle_NotFound();
 
 //#define WIFI_SSID "WIFI" //ไวไฟอีกตัว
-#define WIFI_SSID "lime"
+#define WIFI_SSID "SSID"
 //#define WIFI_PASSWORD "pass" //ไวไฟอีกตัว
-#define WIFI_PASSWORD "88888888"
-#define LINE_TOKEN_PIR "Linetoken"  //Line token
+#define WIFI_PASSWORD "PASS"
+#define LINE_TOKEN_PIR "Linetoken"  //Line token ที่ generate มา
 #define PirPin D6
 bool beep_state = false;
 bool send_state = false;
-const int buttonPin = 4;  //GPIO สวิตช์
+const int buttonPin = 4;  //GPIO สวิตช์ ในที่นี้ต่อที่ขา GPIO4
 int buttonState = 0; //ค่าคงที่ (รูปแบบ switch)
 
 void setup() {
@@ -65,7 +65,7 @@ void loop() {
   CheckWiFi();
   buttonState = digitalRead(buttonPin);
   server.handleClient(); // ตรวจสอบว่ามีคนเรียกหน้าเว็บแล้วหรือยัง เรียกใช้ on connect
-  if (buttonState == HIGH) {
+  if (buttonState == HIGH) { //ต่อสวิตช์ binary ไว้สำหรับเทส
     Serial.println("HIGH");
     String a = String(buttonState);
     String message = "อุณหภูมิปัจจุบัน " + a +"°C สูงเกินกว่าที่กำหนด"; //ใส่ค่าอุณหภูมิตรงนี้
@@ -142,7 +142,7 @@ void handle_NotFound(){
   server.send(404, "text/plain", "Not found");
 }
 
-//HTML
+//HTML //Originated by Ruzell Ramirez https://www.circuitbasics.com/how-to-set-up-a-web-server-using-arduino-and-esp8266-01/
 String SendHTML(float TemperatureWeb,float HumidityWeb, String TimeWeb,String DateWeb){
   String ptr = "<!DOCTYPE html> <html>\n";
   ptr +="<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
@@ -151,8 +151,9 @@ String SendHTML(float TemperatureWeb,float HumidityWeb, String TimeWeb,String Da
   ptr +="</head>\n";
   ptr +="<body>\n";
   ptr +="<div id=\"webpage\">\n";
-  ptr +="<h1><center>ESP8266 Temperature and humidity sensor<center></h1>\n";
+  ptr +="<h1><center>\n\n\n ESP8266 Temperature and humidity sensor<center></h1>\n";
   ptr +="<h2><center>By Apiratchai Lakkum<center></h2>\n";
+  ptr +="<h5><center>Credits: Ruzell Ramirez <center></h5>\n";
 
   ptr +="<p><center>Date: ";
   ptr +=(String)DateWeb;
