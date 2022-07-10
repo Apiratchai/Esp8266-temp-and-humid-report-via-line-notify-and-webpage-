@@ -163,10 +163,10 @@ String SendHTML(float TemperatureWeb,float HumidityWeb, String TimeWeb,String Da
   ptr +="<center></p>";
   ptr +="<p><center>Temperature: ";
   ptr +=(int)TemperatureWeb;
-  ptr +="C<center></p>";
+  ptr +=" °C<center></p>";
   ptr +="<p><center>Humidity: ";
   ptr +=(int)HumidityWeb;
-  ptr +="%<center></p>";
+  ptr +=" %<center></p>";
   
   ptr +="</div>\n";
   ptr +="</body>\n";
