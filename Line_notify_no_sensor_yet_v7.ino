@@ -47,7 +47,6 @@ void setup() {
   Serial.print("\n\nElectricl Engineering Enterprise Group\n");
   WiFiMulti.addAP(WIFI_SSID, WIFI_PASSWORD);
   WiFiMulti.addAP("AndroidAP", "ifmd0883");
-  pinMode(buttonPin, INPUT);
   Serial.println("Connecting Wifi...");
   delay(2000);
   CheckWiFi();
