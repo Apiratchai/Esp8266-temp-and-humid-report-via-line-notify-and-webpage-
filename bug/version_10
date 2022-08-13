@@ -1,4 +1,3 @@
-void Line_Notify1(String message1) ;
 #include <ESP8266WebServer.h>  // web server (optional) 
 #include <ESP8266mDNS.h>       // web dns
 #include <ESP8266WiFi.h>
@@ -25,8 +24,6 @@ String Date;
 int Day;
 int Month;
 int Year;
-String a;
-String b;
 
 String SendHTML(float TemperatureWeb,float HumidityWeb, String TimeWeb, String DateWeb);
 void handle_OnConnect();
@@ -66,22 +63,21 @@ void loop() {
   float Temperature = dht.readTemperature();
   float Humidity = dht.readHumidity();
   if (Temperature >= 25) {
-    String a = "สูงกว่าค่าที่กำหนด";
-    Serial.println(String(Temperature) +"    "+String(Humidity));
+    a = "สูงกว่าค่าที่กำหนด";
   }
   else {
-    String a = "ค่าปกติ";
+    a = "ค่าปกติ";
   }
   if (Humidity >= 50) {
-    String b = "สูงกว่าค่าที่กำหนด";
-    Serial.println(String(Temperature) +"    "+String(Humidity));
+    b = "สูงกว่าค่าที่กำหนด";
   }
   else {
-    String b = "ค่าปกติ";
+    b = "ค่าปกติ";
   }
-  delay(10000);
   String message = "อุณหภูมิปัจจุบัน " + String(Temperature) +"°C " + a + "ความชื้นปัจจุบัน " + String(Humidity) + " เปอร์เซ็น " + b;
+  Serial.println(String(Temperature) +"    "+String(Humidity));
   LINE_Notify(message);
+  delay(10000); // 10sec
   
 server.handleClient();
 }
