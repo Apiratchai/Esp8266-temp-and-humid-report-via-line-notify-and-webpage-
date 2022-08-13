@@ -5,10 +5,10 @@
 #include <ESP8266mDNS.h>       // web dns
 #include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
-#include <NTPClient.h> // server time
-#include <WiFiUdp.h> // time
-#include <DHT.h> // humid and temp module
-#include <WiFiClientSecureAxTLS.h> // works bit IDE blacked out
+#include <NTPClient.h> //เวลา
+#include <WiFiUdp.h> //เวลา
+#include <DHT.h> //เซนเซอร์
+#include <WiFiClientSecureAxTLS.h> //เรียก lib ครบ แต่ IDE blacked out
 
 
 ESP8266WiFiMulti WiFiMulti;
@@ -31,15 +31,20 @@ int Year;
 float avgtemp; //global variable for avg in web (store only uptime)
 float avghumid;
 
+long previous = 0;
+const long interval = 3600000; //1 hour repeat
+
+String message; //global variable for message used in Notify Function
+
 
 String SendHTML(float TemperatureWeb,float HumidityWeb, String TimeWeb, String DateWeb);
 void handle_OnConnect();
 void handle_NotFound();
 void Line_Notify1(String message) ; //message1 เดิม
 
-//#define WIFI_SSID "WIFI" //other wifi
+//#define WIFI_SSID "WIFI" //ไวไฟอีกตัว
 #define WIFI_SSID "WIFI"
-//#define WIFI_PASSWORD "pass" //other wifi
+//#define WIFI_PASSWORD "pass" //ไวไฟอีกตัว
 #define WIFI_PASSWORD "pass"
 #define LINE_TOKEN_PIR "Line token here"  //Line token ที่ generate มา
 #define PirPin D6
@@ -67,7 +72,7 @@ void loop() {
   server.handleClient();
 }
 
-void Work(){             //this is the operator function
+void Work(){
   float xtemp = 0;
   float xhumid = 0;
   int counttemp = 0;
@@ -81,34 +86,40 @@ void Work(){             //this is the operator function
 
   if (dht.readTemperature() >= 25) {
     a = "สูงกว่ากำหนด";
-    Serial.println("temp is above");
+    //Serial.println("temp is above");
   }
   else {
     a = "ค่าปกติ";
-    Serial.println("temp is ok");
+    //Serial.println("temp is ok");
   }
   if (dht.readHumidity() >= 50) {
     b = "สูงกว่ากำหนด";
-    Serial.println("humid is above");
+    //Serial.println("humid is above");
   }
   else {
     b = "ค่าปกติ";
-    Serial.println("humid is ok");
+    //Serial.println("humid is ok");
   }
   Serial.println(String(Temperature) +"    "+String(Humidity));
   String message = "\nอุณหภูมิปัจจุบัน\n" + String(Temperature) +"°C " + String(a) + "\nความชื้นปัจจุบัน \n" + String(Humidity)+ " เปอร์เซ็น " + String(b);
-  LINE_Notify(message);
 
-  //average part
-  xtemp = xtemp + Temperature;
-  counttemp = counttemp + 1;
-  avgtemp = xtemp/counttemp;
+  //average part //could be seperate for easier maintainance but have to declare more variables
+  long current = millis(); //this runs upto 50 days so long is required
+  if (current - previous >= interval){ //interval 1 hour
+    xtemp = xtemp + Temperature;
+    counttemp = counttemp + 1;
+    avgtemp = xtemp/counttemp;
   
-  xhumid = xhumid + Humidity;
-  counthumid = counthumid + 1;
-  avghumid = xhumid/counthumid;
-  delay(3600000);  //1hour delay
+    xhumid = xhumid + Humidity;
+    counthumid = counthumid + 1;
+    avghumid = xhumid/counthumid;
+    
+    Serial.println("millis up time"+ current);
+    LINE_Notify(message);
+    previous = current;
+  }
 }
+
 
 void CheckWiFi() {      //Check wifi
   if (WiFiMulti.run() != WL_CONNECTED) {
@@ -183,11 +194,12 @@ String SendHTML(float TemperatureWeb,float HumidityWeb, String TimeWeb,String Da
   ptr +="<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
   ptr +="<title>ESP8266 Global Server</title>\n";
 
-  ptr +="</head>\n";   //ใส่ CSS ยังไงวะไอสาส //ไม่ใส่มันละ
+  ptr +="</head>\n";   //ใส่ CSS ยังไงวะไอสาส
   ptr +="<body>\n";
   ptr +="<div id=\"webpage\">\n";
   ptr +="<h1><center>ESP8266 Temperature and Humidity sensor<center></h1>\n";
   ptr +="<h2><center>By Apiratchai Lakkum<center></h2>\n";
+  //ptr +="<h6><center>Credits: Ruzell Ramirez <center></h6>\n";
 
   ptr +="<p><center>Date: ";
   ptr +=(String)DateWeb;
@@ -205,7 +217,7 @@ String SendHTML(float TemperatureWeb,float HumidityWeb, String TimeWeb,String Da
   ptr +=" %<center></p>";
   ptr +="<p><center>Average Humidity: ";
   ptr +=String(avghumid);
-  ptr +="<br><br><br><br><br><br><br><br><br><br><br><br>"; //for blank line
+  ptr +="<br><br><br><br><br><br><br><br><br><br><br><br>"; //for blank paragraph
   ptr +="<p> \n server uptime<p> ";
   ptr +=uptime_formatter::getUptime();
   
